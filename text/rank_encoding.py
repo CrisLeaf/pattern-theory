@@ -1,3 +1,4 @@
+import numpy as np
 from random import sample
 import time
 import sys
@@ -5,7 +6,7 @@ from termcolor import colored
 
 if __name__ == "__main__":
 	text = str(input("Enter a sentence:"))
-	#memory = int(input("How many letters to remember:"))
+	memory = int(input("How many letters to remember:"))
 	print(f"Text: {text}")
 	sleep_time = 0.1
 
@@ -14,7 +15,8 @@ def get_n_grams(text, memory):
 	n_grams = [["".join([text[i+j] for j in range(k+1)]) for i in range(text_length-k)] for k in range(memory+1)]
 	return n_grams
 
-def get_ranks(n_grams):
+def get_ranks(text, memory):
+	n_grams = get_n_grams(text, memory)
 	all_ranks = []
 	for i in range(len(n_grams)):
 		freq = dict()
@@ -39,8 +41,7 @@ def get_ranks(n_grams):
 	return all_ranks
 
 def rank_encode(text, memory):
-	n_grams = get_n_grams(text, memory)
-	all_ranks = get_ranks(n_grams)
+	all_ranks = get_ranks(text, memory)
 	code = ""
 	for index, letter in enumerate(text):
 		if index < memory:
@@ -49,10 +50,29 @@ def rank_encode(text, memory):
 			code += str(all_ranks[memory][text[index-memory:index+1]])
 	return int(code)
 
+def get_frequency(all_ranks, k=1, memory=3):
+	freq_ = 0
+	for key, value in all_ranks[memory].items():
+		if value == k:
+			freq_ += 1
+	k_freq = freq_ / len(all_ranks[memory])
+	return k_freq
+
+def get_entropies():
+	entropies = []
+	for i in range(memory):
+		all_ranks = get_ranks(text, i)
+		unique_freq = set(value for value in all_ranks[i].values())
+		entropy = 0
+		for k in unique_freq:
+			k_freq = get_frequency(all_ranks, k, i)
+			entropy += k_freq * np.log2(1/k_freq)
+		entropies.append(entropy)
+	return entropies
+
 # Printed version
 def print_rank_encode(text, memory):
-	n_grams = get_n_grams(text, memory)
-	all_ranks = get_ranks(n_grams)
+	all_ranks = get_ranks(text, memory)
 	code = ""
 	print(f"{memory} memory code:")
 	for index, letter in enumerate(text):
@@ -68,10 +88,8 @@ def print_rank_encode(text, memory):
 			code += str(all_ranks[memory][text[index-memory:index+1]]) 
 	sys.stdout.write(u"\u001b[1000D" + colored(str(code), "blue"))
 	sys.stdout.flush()
-	print("\n")
 	print
-
-for i in range(10):
+entropies = get_entropies()
+for i in range(memory):
 	print_rank_encode(text, memory=i)
-
-
+	print(f" - Entropy: {entropies[i]}")
