@@ -5,10 +5,10 @@ import sys
 from termcolor import colored
 
 if __name__ == "__main__":
-	text = str(input("Enter a sentence:"))
-	memory = int(input("How many letters to remember:"))
+	text = str(input("Enter a sentence: "))
+	memory = int(input("Memory: "))
 	print(f"Text: {text}")
-	sleep_time = 0.1
+	sleep_time = 0.2
 
 def get_n_grams(text, memory):
 	text_length = len(text)
@@ -58,7 +58,7 @@ def get_frequency(all_ranks, k=1, memory=3):
 	k_freq = freq_ / len(all_ranks[memory])
 	return k_freq
 
-def get_entropies():
+def get_entropies(memory):
 	entropies = []
 	for i in range(memory):
 		all_ranks = get_ranks(text, i)
@@ -74,7 +74,7 @@ def get_entropies():
 def print_rank_encode(text, memory):
 	all_ranks = get_ranks(text, memory)
 	code = ""
-	print(f"{memory} memory code:")
+	print(f"{memory}-memory code:")
 	for index, letter in enumerate(text):
 		if index < memory:
 			sys.stdout.write(u"\u001b[1000D" + colored(code, "blue") + colored(text[index], "red") + text[index+1:])
@@ -89,7 +89,11 @@ def print_rank_encode(text, memory):
 	sys.stdout.write(u"\u001b[1000D" + colored(str(code), "blue"))
 	sys.stdout.flush()
 	print
-entropies = get_entropies()
-for i in range(memory):
+entropies = get_entropies(memory+1)
+for i in range(memory+1):
 	print_rank_encode(text, memory=i)
-	print(f" - Entropy: {entropies[i]}")
+	print("\n")
+	print(f"Entropy: {entropies[i]}")
+	print("\n")
+
+print("\n")
